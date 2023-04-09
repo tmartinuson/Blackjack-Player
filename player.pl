@@ -27,6 +27,12 @@ hand([Card|Rest], Value) :-
     hand(Rest, RestValue),
     Value is CardValue + RestValue.
 
+basic_strategy(C1, C2, DC, A) :-
+    hand([C1, C2], Value),
+    value(DC, DValue),
+    DValue >= 7,
+    A = hit.
+
 % TODO initialize a dynamic predicate that keeps track of all 13 played cards within a deck
 
 % TODO build a cli program that takes input of a players cards and replies the basic strategy
