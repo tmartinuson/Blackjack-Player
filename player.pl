@@ -15,7 +15,7 @@ value(four, 4).
 value(three, 3).
 value(two, 2).
 
-% Actions needed
+% Available actions a player can take
 action(hit).
 action(stand).
 action(double).
@@ -32,6 +32,124 @@ basic_strategy(C1, C2, DC, A) :-
     value(DC, DValue),
     DValue >= 7,
     A = hit.
+
+% -----------------  Pairs splitting strategy  -----------------
+% Facts for a pair of two's
+pairs_splitting(two, two, DC, A) :-
+    value(DC, DValue),
+    DValue >= 8,
+    A = hit.
+
+pairs_splitting(two, two, DC, A) :-
+    value(DC, DValue),
+    DValue < 8,
+    A = split.
+
+
+
+% Facts for a pair of three's
+pairs_splitting(three, three, DC, A) :-
+    value(DC, DValue),
+    DValue >= 8,
+    A = hit.
+
+pairs_splitting(three, three, DC, A) :-
+    value(DC, DValue),
+    DValue < 8,
+    A = split.
+
+
+
+% Facts for a pair of four's
+pairs_splitting(four, four, DC, A) :-
+    value(DC, DValue),
+    DValue < 5,
+    A = hit.
+
+pairs_splitting(four, four, DC, A) :-
+    value(DC, DValue),
+    DValue < 7,
+    DValue >= 5,
+    A = split.
+
+pairs_splitting(four, four, DC, A) :-
+    value(DC, DValue),
+    DValue >= 7,
+    A = hit.
+
+
+
+% Facts for a pair of fives's
+pairs_splitting(five, five, _, A) :-
+    A = double.
+
+
+
+% Facts for a pair of six's
+pairs_splitting(six, six, DC, A) :-
+    value(DC, DValue),
+    DValue >= 7,
+    A = hit.
+
+pairs_splitting(six, six, DC, A) :-
+    value(DC, DValue),
+    DValue < 7,
+    A = split.
+
+
+
+% Facts for a pair of seven's
+pairs_splitting(seven, seven, DC, A) :-
+    value(DC, DValue),
+    DValue >= 8,
+    A = hit.
+
+pairs_splitting(seven, seven, DC, A) :-
+    value(DC, DValue),
+    DValue < 8,
+    A = split.
+
+
+
+% Facts for a pair of eight's
+pairs_splitting(eight, eight, DC, A) :-
+    A = split.
+
+
+
+% Facts for a pair of nine's
+pairs_splitting(nine, nine, DC, A) :-
+    value(DC, DValue),
+    DValue < 7,
+    A = split.
+
+pairs_splitting(nine, nine, DC, A) :-
+    value(DC, DValue),
+    DValue = 7,
+    A = stand.
+
+pairs_splitting(nine, nine, DC, A) :-
+    value(DC, DValue),
+    DValue >= 8,
+    DValue < 10,
+    A = split.
+
+pairs_splitting(nine, nine, DC, A) :-
+    value(DC, DValue),
+    DValue >= 10,
+    A = stand.
+
+
+
+% Facts for a pair of ten's
+pairs_splitting(eight, eight, DC, A) :-
+    A = stand.
+
+
+
+% Facts for a pair of ace's
+pairs_splitting(eight, eight, DC, A) :-
+    A = split.
 
 % TODO initialize a dynamic predicate that keeps track of all 13 played cards within a deck
 
