@@ -123,18 +123,66 @@ soft_totals(jack, ace, DC, A) :- soft_totals(ace, jack, DC, A).
 soft_totals(queen, ace, DC, A) :- soft_totals(ace, queen, DC, A).
 soft_totals(king, ace, DC, A) :- soft_totals(ace, king, DC, A).
 
-% -----------------  Dealer utils  -----------------
+% -----------------  Hard totals strategy  -----------------
+
+% hand total is within five-eight
+hard_totals(C1, C2, DC, A) :- player_less_than_value(C1, C2, 9), A = hit.
+
+% hand total is nine
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 9), dealer_less_than_value(DC, 3), A = hit.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 9), dealer_between_value(DC, 2, 7), A = double.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 9), dealer_greater_than_value(DC, 6), A = hit.
+
+% hand total is ten
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 10), dealer_less_than_value(DC, 10), A = double.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 10), dealer_greater_than_value(DC, 9), A = hit.
+
+% hand total is 11
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 11), dealer_less_than_value(DC, 11), A = double.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 11), dealer_greater_than_value(DC, 10), A = hit.
+
+% hand total is 12
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 12), dealer_less_than_value(DC, 4), A = hit.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 12), dealer_between_value(DC, 3, 7), A = stand.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 12), dealer_greater_than_value(DC, 6), A = hit.
+
+% hand total is 13
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 13), dealer_less_than_value(DC, 7), A = stand.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 13), dealer_greater_than_value(DC, 6), A = hit.
+
+% hand total is 14
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 14), dealer_less_than_value(DC, 7), A = stand.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 14), dealer_greater_than_value(DC, 6), A = hit.
+
+% hand total is 15
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 15), dealer_less_than_value(DC, 7), A = stand.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 15), dealer_greater_than_value(DC, 6), A = hit.
+
+% hand total is 16
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 16), dealer_less_than_value(DC, 7), A = stand.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 16), dealer_greater_than_value(DC, 6), A = hit.
+
+% hand total is 17,18,19,20
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 17), A = stand.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 18), A = stand.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 19), A = stand.
+hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 20), A = stand.
+
+% -----------------  Utils  -----------------
 
 dealer_greater_than_value(DC, Value) :- value(DC, DValue), DValue > Value.
 dealer_less_than_value(DC, Value) :- value(DC, DValue), DValue < Value.
 dealer_between_value(DC, Left, Right) :- dealer_greater_than_value(DC, Left), dealer_less_than_value(DC, Right).
+
+player_less_than_value(C1, C2, Value) :- value(C1, C1Value), value(C2, C2Value), C1Value + C2Value < Value.
+player_hand_sum(C1, C2, Value) :- value(C1, C1Value), value(C2, C2Value), Result is C1Value + C2Value, Result =:= Value.
 
 % -----------------  Basic strategy logic  -----------------
 
 basic_strategy(C1, C1, DC, A) :- pairs_splitting(C1, C1, DC, A).
 basic_strategy(ace, C1, DC, A) :- soft_totals(ace, C1, DC, A).
 basic_strategy(C1, ace, DC, A) :- soft_totals(ace, C1, DC, A).
-basic_strategy(C1, C2, DC, A) :- C1 \= ace, C2 \= ace, C1 \= C2, hand_total(C1, C2, DC, A).
+basic_strategy(C1, C2, DC, A) :- C1 \= ace, C2 \= ace, C1 \= C2, hard_totals(C1, C2, DC, A).
 
 hand([], 0).
 hand([Card|Rest], Value) :-
@@ -147,7 +195,5 @@ hand_total(C1, C2, DC, A) :-
     A = hit.
 
 % TODO initialize a dynamic predicate that keeps track of all 13 played cards within a deck
-
-% TODO build a cli program that takes input of a players cards and replies the basic strategy
 
 % TODO STRETCH incorporate dynamic predicate to count cards and add influence into the basic strategy play
