@@ -132,7 +132,9 @@ dealer_between_value(DC, Left, Right) :- dealer_greater_than_value(DC, Left), de
 % -----------------  Basic strategy logic  -----------------
 
 basic_strategy(C1, C1, DC, A) :- pairs_splitting(C1, C1, DC, A).
-basic_strategy(C1, C2, DC, A) :- C1 \= C2, hand_total(C1, C2, DC, A).
+basic_strategy(ace, C1, DC, A) :- soft_totals(ace, C1, DC, A).
+basic_strategy(C1, ace, DC, A) :- soft_totals(ace, C1, DC, A).
+basic_strategy(C1, C2, DC, A) :- C1 \= ace, C2 \= ace, C1 \= C2, hand_total(C1, C2, DC, A).
 
 hand([], 0).
 hand([Card|Rest], Value) :-
@@ -142,8 +144,6 @@ hand([Card|Rest], Value) :-
 
 hand_total(C1, C2, DC, A) :-
     hand([C1, C2], Value),
-    value(DC, DValue),
-    DValue >= 7,
     A = hit.
 
 % TODO initialize a dynamic predicate that keeps track of all 13 played cards within a deck
