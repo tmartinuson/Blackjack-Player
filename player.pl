@@ -1,4 +1,4 @@
-% TODO transfer out the basic rule logic to logic statements
+% CPSC 312 Black Jack Basic Strategy Recommender
 
 % Values of the cards
 value(ace, 11).
@@ -22,118 +22,48 @@ action(double).
 action(split).
 
 % -----------------  Pairs splitting strategy  -----------------
-% Facts for a pair of two's
-pairs_splitting(two, two, DC, A) :-
-    value(DC, DValue),
-    DValue >= 8,
-    A = hit.
 
-pairs_splitting(two, two, DC, A) :-
-    value(DC, DValue),
-    DValue < 8,
-    A = split.
+% Facts for a pair of twos
+pairs_splitting(two, two, DC, A) :- dealer_greater_than_value(DC, 7), A = hit.
+pairs_splitting(two, two, DC, A) :- dealer_less_than_value(DC, 8), A = split.
 
+% Facts for a pair of threes
+pairs_splitting(three, three, DC, A) :- dealer_greater_than_value(DC, 7), A = hit.
+pairs_splitting(three, three, DC, A) :- dealer_less_than_value(DC, 8), A = split.
 
+% Facts for a pair of fours
+pairs_splitting(four, four, DC, A) :- dealer_less_than_value(DC, 5), A = hit.
+pairs_splitting(four, four, DC, A) :- dealer_between_value(DC, 4, 7), A = split.
+pairs_splitting(four, four, DC, A) :- dealer_greater_than_value(DC, 6), A = hit.
 
-% Facts for a pair of three's
-pairs_splitting(three, three, DC, A) :-
-    value(DC, DValue),
-    DValue >= 8,
-    A = hit.
+% Facts for a pair of fivess
+pairs_splitting(five, five, _, A) :- A = double.
 
-pairs_splitting(three, three, DC, A) :-
-    value(DC, DValue),
-    DValue < 8,
-    A = split.
+% Facts for a pair of sixs
+pairs_splitting(six, six, DC, A) :- dealer_greater_than_value(DC, 6), A = hit.
+pairs_splitting(six, six, DC, A) :- dealer_less_than_value(DC, 7), A = split.
 
+% Facts for a pair of sevens
+pairs_splitting(seven, seven, DC, A) :- dealer_greater_than_value(DC, 7), A = hit.
+pairs_splitting(seven, seven, DC, A) :- dealer_less_than_value(DC, 8), A = split.
 
+% Facts for a pair of eights
+pairs_splitting(eight, eight, DC, A) :- A = split.
 
-% Facts for a pair of four's
-pairs_splitting(four, four, DC, A) :-
-    value(DC, DValue),
-    DValue < 5,
-    A = hit.
+% Facts for a pair of nines
+pairs_splitting(nine, nine, DC, A) :- dealer_less_than_value(DC, 7), A = split.
+pairs_splitting(nine, nine, DC, A) :- dealer_between_value(DC, 6, 8), A = stand.
+pairs_splitting(nine, nine, DC, A) :- dealer_between_value(DC, 7, 10), A = split.
+pairs_splitting(nine, nine, DC, A) :- dealer_greater_than_value(DC, 9), A = stand.
 
-pairs_splitting(four, four, DC, A) :-
-    value(DC, DValue),
-    DValue < 7,
-    DValue >= 5,
-    A = split.
+% Facts for a pair of tens and faces
+pairs_splitting(ten, ten, DC, A) :- A = stand.
+pairs_splitting(jack, jack, DC, A) :- A = stand.
+pairs_splitting(queen, queen, DC, A) :- A = stand.
+pairs_splitting(king, king, DC, A) :- A = stand.
 
-pairs_splitting(four, four, DC, A) :-
-    value(DC, DValue),
-    DValue >= 7,
-    A = hit.
-
-
-
-% Facts for a pair of fives's
-pairs_splitting(five, five, _, A) :-
-    A = double.
-
-
-
-% Facts for a pair of six's
-pairs_splitting(six, six, DC, A) :-
-    value(DC, DValue),
-    DValue >= 7,
-    A = hit.
-
-pairs_splitting(six, six, DC, A) :-
-    value(DC, DValue),
-    DValue < 7,
-    A = split.
-
-
-
-% Facts for a pair of seven's
-pairs_splitting(seven, seven, DC, A) :-
-    value(DC, DValue),
-    DValue >= 8,
-    A = hit.
-
-pairs_splitting(seven, seven, DC, A) :-
-    value(DC, DValue),
-    DValue < 8,
-    A = split.
-
-
-
-% Facts for a pair of eight's
-pairs_splitting(eight, eight, DC, A) :-
-    A = split.
-
-
-
-% Facts for a pair of nine's
-pairs_splitting(nine, nine, DC, A) :-
-    value(DC, DValue),
-    DValue < 7,
-    A = split.
-
-pairs_splitting(nine, nine, DC, A) :-
-    value(DC, DValue),
-    DValue = 7,
-    A = stand.
-
-pairs_splitting(nine, nine, DC, A) :-
-    value(DC, DValue),
-    DValue >= 8,
-    DValue < 10,
-    A = split.
-
-pairs_splitting(nine, nine, DC, A) :-
-    value(DC, DValue),
-    DValue >= 10,
-    A = stand.
-
-% Facts for a pair of ten's
-pairs_splitting(ten, ten, DC, A) :-
-    A = stand.
-
-% Facts for a pair of ace's
-pairs_splitting(ace, ace, DC, A) :-
-    A = split.
+% Facts for a pair of aces
+pairs_splitting(ace, ace, DC, A) :- A = split.
 
 % -----------------  Soft totals strategy  -----------------
 
@@ -201,11 +131,8 @@ dealer_between_value(DC, Left, Right) :- dealer_greater_than_value(DC, Left), de
 
 % -----------------  Basic strategy logic  -----------------
 
-basic_strategy(C1, C1, DC, A) :-
-    pairs_splitting(C1, C1, DC, A).
-basic_strategy(C1, C2, DC, A) :-
-    C1 \= C2,
-    hand_total(C1, C2, DC, A).
+basic_strategy(C1, C1, DC, A) :- pairs_splitting(C1, C1, DC, A).
+basic_strategy(C1, C2, DC, A) :- C1 \= C2, hand_total(C1, C2, DC, A).
 
 hand([], 0).
 hand([Card|Rest], Value) :-
