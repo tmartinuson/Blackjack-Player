@@ -48,7 +48,7 @@ pairs_splitting(seven, seven, DC, A) :- dealer_greater_than_value(DC, 7), A = hi
 pairs_splitting(seven, seven, DC, A) :- dealer_less_than_value(DC, 8), A = split.
 
 % Facts for a pair of eights
-pairs_splitting(eight, eight, DC, A) :- A = split.
+pairs_splitting(eight, eight, _, A) :- A = split.
 
 % Facts for a pair of nines
 pairs_splitting(nine, nine, DC, A) :- dealer_less_than_value(DC, 7), A = split.
@@ -57,13 +57,13 @@ pairs_splitting(nine, nine, DC, A) :- dealer_between_value(DC, 7, 10), A = split
 pairs_splitting(nine, nine, DC, A) :- dealer_greater_than_value(DC, 9), A = stand.
 
 % Facts for a pair of tens and faces
-pairs_splitting(ten, ten, DC, A) :- A = stand.
-pairs_splitting(jack, jack, DC, A) :- A = stand.
-pairs_splitting(queen, queen, DC, A) :- A = stand.
-pairs_splitting(king, king, DC, A) :- A = stand.
+pairs_splitting(ten, ten, _, A) :- A = stand.
+pairs_splitting(jack, jack, _, A) :- A = stand.
+pairs_splitting(queen, queen, _, A) :- A = stand.
+pairs_splitting(king, king, _, A) :- A = stand.
 
 % Facts for a pair of aces
-pairs_splitting(ace, ace, DC, A) :- A = split.
+pairs_splitting(ace, ace, _, A) :- A = split.
 
 % -----------------  Soft totals strategy  -----------------
 
@@ -106,18 +106,18 @@ soft_totals(ace, seven, DC, A) :- dealer_greater_than_value(DC, 10), A = stand.
 soft_totals(seven, ace, DC, A) :- soft_totals(ace, seven, DC, A).
 
 % ace, eight soft totals
-soft_totals(ace, eight, DC, A) :- A = stand.
+soft_totals(ace, eight, _, A) :- A = stand.
 soft_totals(eight, ace, DC, A) :- soft_totals(ace, eight, DC, A).
 
 % ace, nine soft totals
-soft_totals(ace, nine, DC, A) :- A = stand.
+soft_totals(ace, nine, _, A) :- A = stand.
 soft_totals(nine, ace, DC, A) :- soft_totals(ace, nine, DC, A).
 
 % ace, 10 and face cards soft totals
-soft_totals(ace, ten, DC, A) :- A = stand.
-soft_totals(ace, jack, DC, A) :- A = stand.
-soft_totals(ace, queen, DC, A) :- A = stand.
-soft_totals(ace, king, DC, A) :- A = stand.
+soft_totals(ace, ten, _, A) :- A = stand.
+soft_totals(ace, jack, _, A) :- A = stand.
+soft_totals(ace, queen, _, A) :- A = stand.
+soft_totals(ace, king, _, A) :- A = stand.
 soft_totals(ten, ace, DC, A) :- soft_totals(ace, ten, DC, A).
 soft_totals(jack, ace, DC, A) :- soft_totals(ace, jack, DC, A).
 soft_totals(queen, ace, DC, A) :- soft_totals(ace, queen, DC, A).
@@ -126,7 +126,7 @@ soft_totals(king, ace, DC, A) :- soft_totals(ace, king, DC, A).
 % -----------------  Hard totals strategy  -----------------
 
 % hand total is within five-eight
-hard_totals(C1, C2, DC, A) :- player_less_than_value(C1, C2, 9), A = hit.
+hard_totals(C1, C2, _, A) :- player_less_than_value(C1, C2, 9), A = hit.
 
 % hand total is nine
 hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 9), dealer_less_than_value(DC, 3), A = hit.
@@ -163,10 +163,10 @@ hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 16), dealer_less_than_valu
 hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 16), dealer_greater_than_value(DC, 6), A = hit.
 
 % hand total is 17,18,19,20
-hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 17), A = stand.
-hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 18), A = stand.
-hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 19), A = stand.
-hard_totals(C1, C2, DC, A) :- player_hand_sum(C1, C2, 20), A = stand.
+hard_totals(C1, C2, _, A) :- player_hand_sum(C1, C2, 17), A = stand.
+hard_totals(C1, C2, _, A) :- player_hand_sum(C1, C2, 18), A = stand.
+hard_totals(C1, C2, _, A) :- player_hand_sum(C1, C2, 19), A = stand.
+hard_totals(C1, C2, _, A) :- player_hand_sum(C1, C2, 20), A = stand.
 
 % -----------------  Utils  -----------------
 
@@ -178,11 +178,17 @@ player_less_than_value(C1, C2, Value) :- value(C1, C1Value), value(C2, C2Value),
 player_hand_sum(C1, C2, Value) :- value(C1, C1Value), value(C2, C2Value), Result is C1Value + C2Value, Result =:= Value.
 
 % -----------------  Basic strategy logic  -----------------
+incr(X, X1) :-
+    number(X), number(X1), !,
+    X1 is X+1.
+
+:- dynamic card_count/1.
+card_count(0).
 
 basic_strategy(C1, C1, DC, A) :- pairs_splitting(C1, C1, DC, A).
 basic_strategy(ace, C1, DC, A) :- soft_totals(ace, C1, DC, A).
 basic_strategy(C1, ace, DC, A) :- soft_totals(ace, C1, DC, A).
-basic_strategy(C1, C2, DC, A) :- C1 \= ace, C2 \= ace, C1 \= C2, hard_totals(C1, C2, DC, A).
+basic_strategy(C1, C2, DC, A) :- C1 \= ace, C2 \= ace, C1 \= C2, hard_totals(C1, C2, DC, A), retract(card_count(C)), incr(C, CN), assertz(card_count(CN)).
 
 hand([], 0).
 hand([Card|Rest], Value) :-
@@ -190,8 +196,8 @@ hand([Card|Rest], Value) :-
     hand(Rest, RestValue),
     Value is CardValue + RestValue.
 
-hand_total(C1, C2, DC, A) :-
-    hand([C1, C2], Value),
+hand_total(C1, C2, _, A) :-
+    hand([C1, C2], _),
     A = hit.
 
 % TODO initialize a dynamic predicate that keeps track of all 13 played cards within a deck
