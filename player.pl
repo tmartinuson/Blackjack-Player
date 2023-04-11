@@ -220,12 +220,12 @@ count_card_strategy(C1, C2, DC, FC) :-
 card_needs(FC, High, Low) :-
     (   FC > 0
     ->  High = 'Likely to get a ',
-        Low = 'Very unlikely to get a '
+        Low = 'Unlikely to get a '
     ;   FC =:= 0
     ->  High = 'Unlikely to get a ',
         Low = 'Unlikely to get a '
     ;   FC < 0
-    ->  High = 'Very unlikely to get a ',
+    ->  High = 'Unlikely to get a ',
         Low = 'Likely to get a '
     ).
 
