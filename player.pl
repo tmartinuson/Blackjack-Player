@@ -199,7 +199,7 @@ count(V, FC) :-
 
 count_card(C, V) :-
     card_in_range_exclusive(C, 1, 7),
-    V is -1.
+    V is 1.
 
 count_card(C, V) :-
     card_in_range_exclusive(C, 6, 10),
@@ -207,8 +207,7 @@ count_card(C, V) :-
 
 count_card(C, V) :-
     card_in_range_exclusive(C, 9, 12),
-    V is 1.
-
+    V is -1.
 
 count_card_strategy(C1, C2, DC, FC) :-
     count_card(C1, V1),
@@ -218,6 +217,25 @@ count_card_strategy(C1, C2, DC, FC) :-
     count_card(DC, V3),
     count(V3, FC).
 
+card_needs(FC, High, Low) :-
+    (   FC > 0
+    ->  High = 'Likely to get a ',
+        Low = 'Very unlikely to get a '
+    ;   FC =:= 0
+    ->  High = 'Unlikely to get a ',
+        Low = 'Unlikely to get a '
+    ;   FC < 0
+    ->  High = 'Very unlikely to get a ',
+        Low = 'Likely to get a '
+    ).
+
+print_card_needs(FC) :-
+    card_needs(FC, High, Low),
+    write(High),
+    writeln('10,J,Q,K,A card.'),
+    write(Low),
+    writeln('2-6 card.').
+    
 hand([], 0).
 hand([Card|Rest], Value) :-
     value(Card, CardValue),
@@ -228,4 +246,15 @@ hand_total(C1, C2, _, A) :-
     hand([C1, C2], _),
     A = hit.
 
-% TODO STRETCH incorporate dynamic predicate to count cards and add influence into the basic strategy play
+% ----------------- Main Program -----------------
+
+play(C1, C2, DC) :-
+    write('Basic strategy says: '),
+    basic_strategy(C1, C2, DC, Strat),
+    writeln(Strat),
+    count_card_strategy(C1, C2, DC, Count),
+    !,
+    write('Current running card count: '),
+    writeln(Count),
+    print_card_needs(Count).
+    
