@@ -232,9 +232,9 @@ card_needs(FC, High, Low) :-
 print_card_needs(FC) :-
     card_needs(FC, High, Low),
     write(High),
-    writeln('10,J,Q,K,A card.'),
+    writeln('10,J,Q,K,A card on next hit'),
     write(Low),
-    writeln('2-6 card.').
+    writeln('2-6 card on next hit').
     
 hand([], 0).
 hand([Card|Rest], Value) :-
